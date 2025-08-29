@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shop Price Finder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    select, input, button {
+      padding: 8px;
+      margin: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #eee;
+    }
+    .highlight {
+      background: #c8f7c5; /* light green for cheapest */
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🔎 Shop Price Finder</h2>
+
+  <!-- Location dropdown -->
+  <label for="locationFilter">Select Location:</label>
+  <select id="locationFilter">
+    <option value="all">All</option>
+    <option value="Mysore">Mysore</option>
+    <option value="Bangalore">Bangalore</option>
+    <option value="Chennai">Chennai</option>
+    <option value="Hyderabad">Hyderabad</option>
+  </select>
+
+  <!-- Search bar -->
+  <input type="text" id="searchInput" placeholder="Enter item name...">
+  <button onclick="searchItem()">Search</button>
+
+  <!-- Results area -->
+  <div id="results"></div>
+
+  <script>
+    // Mock shop data (JSON)
+    const shops = [
+  {
+    "name": "Big Bazaar",
+    "location": "Mysore",
+    "items": [
+      { "name": "rice", "price": 55 },
+      { "name": "sugar", "price": 40 },
+      { "name": "atta", "price": 42 },
+      { "name": "toor dal", "price": 110 },
+      { "name": "urad dal", "price": 120 },
+      { "name": "masoor dal", "price": 95 },
+      { "name": "wheat flour", "price": 48 },
+      { "name": "refined oil", "price": 140 },
+      { "name": "mustard oil", "price": 160 },
+      { "name": "milk (1L)", "price": 55 },
+      { "name": "bread", "price": 40 },
+      { "name": "tea powder", "price": 180 },
+      { "name": "coffee powder", "price": 220 },
+      { "name": "apples (1kg)", "price": 150 },
+      { "name": "bananas (1 dozen)", "price": 60 }
+    ]
+  },
+  {
+    "name": "Vishal Mega Mart",
+    "location": "Mysore",
+    "items": [
+      { "name": "rice", "price": 35 },
+      { "name": "sugar", "price": 20 },
+      { "name": "atta", "price": 40 },
+      { "name": "toor dal", "price": 108 },
+      { "name": "urad dal", "price": 118 },
+      { "name": "masoor dal", "price": 93 },
+      { "name": "wheat flour", "price": 47 },
+      { "name": "refined oil", "price": 138 },
+      { "name": "mustard oil", "price": 158 },
+      { "name": "milk (1L)", "price": 54 },
+      { "name": "bread", "price": 38 },
+      { "name": "tea powder", "price": 175 },
+      { "name": "coffee powder", "price": 215 },
+      { "name": "apples (1kg)", "price": 148 },
+      { "name": "bananas (1 dozen)", "price": 58 }
+    ]
+  },
+
+  {
+    "name": "D-Mart",
+    "location": "Bangalore",
+    "items": [
+      { "name": "rice", "price": 52 },
+      { "name": "sugar", "price": 42 },
+      { "name": "atta", "price": 44 },
+      { "name": "toor dal", "price": 112 },
+      { "name": "urad dal", "price": 122 },
+      { "name": "masoor dal", "price": 97 },
+      { "name": "wheat flour", "price": 49 },
+      { "name": "refined oil", "price": 142 },
+      { "name": "mustard oil", "price": 162 },
+      { "name": "milk (1L)", "price": 56 },
+      { "name": "bread", "price": 41 },
+      { "name": "tea powder", "price": 182 },
+      { "name": "coffee powder", "price": 225 },
+      { "name": "apples (1kg)", "price": 152 },
+      { "name": "bananas (1 dozen)", "price": 62 }
+    ]
+  },
+  {
+    "name": "Metro Cash & Carry",
+    "location": "Bangalore",
+    "items": [
+      { "name": "rice", "price": 49 },
+      { "name": "sugar", "price": 37 },
+      { "name": "atta", "price": 43 },
+      { "name": "toor dal", "price": 109 },
+      { "name": "urad dal", "price": 117 },
+      { "name": "masoor dal", "price": 92 },
+      { "name": "wheat flour", "price": 46 },
+      { "name": "refined oil", "price": 137 },
+      { "name": "mustard oil", "price": 157 },
+      { "name": "milk (1L)", "price": 53 },
+      { "name": "bread", "price": 39 },
+      { "name": "tea powder", "price": 176 },
+      { "name": "coffee powder", "price": 218 },
+      { "name": "apples (1kg)", "price": 147 },
+      { "name": "bananas (1 dozen)", "price": 59 }
+    ]
+  }
+];
+
+
+    // Search function
+    function searchItem() {
+      let search = document.getElementById("searchInput").value.toLowerCase();
+      let locationFilter = document.getElementById("locationFilter").value;
+      let resultsDiv = document.getElementById("results");
+
+      if (!search) {
+        resultsDiv.innerHTML = "<p style='color:red'>⚠️ Please enter an item name.</p>";
+        return;
+      }
+
+      let matches = [];
+
+      shops.forEach(shop => {
+        // Skip shops not in selected location
+        if (locationFilter !== "all" && shop.location !== locationFilter) {
+          return;
+        }
+
+        // Find matching items
+        shop.items.forEach(item => {
+          if (item.name.toLowerCase().includes(search)) {
+            matches.push({
+              shopName: shop.name,
+              location: shop.location,
+              price: item.price
+            });
+          }
+        });
+      });
+
+      if (matches.length === 0) {
+        resultsDiv.innerHTML = "<p>❌ No shops found for that item in this location.</p>";
+        return;
+      }
+
+      // Find cheapest
+      let cheapest = matches.reduce((min, curr) => 
+        curr.price < min.price ? curr : min, matches[0]);
+
+      // Build results table
+      let html = "<table><tr><th>Shop</th><th>Location</th><th>Price</th></tr>";
+      matches.forEach(m => {
+        let highlight = (m.price === cheapest.price) ? "class='highlight'" : "";
+        html += `<tr ${highlight}><td>${m.shopName}</td><td>${m.location}</td><td>₹${m.price}</td></tr>`;
+      });
+      html += "</table>";
+
+      resultsDiv.innerHTML = html;
+    }
+  </script>
+
+</body>
+</html>
