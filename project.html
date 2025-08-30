@@ -50,6 +50,11 @@
       border-radius: 6px;
       border: 1px solid #ddd;
     }
+    .cheapest {
+      border: 2px solid #4CAF50;
+      background: #eaffea;
+      font-weight: bold;
+    }
     .not-found {
       color: red;
       font-weight: bold;
@@ -83,11 +88,19 @@
           // Item not available
           resultsDiv.innerHTML = `<p class="not-found">${data.message}</p>`;
         } else if (Array.isArray(data) && data.length > 0) {
+          // Find cheapest price
+          const cheapestPrice = Math.min(...data.map(r => r.price));
+
           // Show shop results
           data.forEach(r => {
             const div = document.createElement("div");
             div.className = "shop-card";
-            div.innerHTML = `<strong>${r.shop}</strong> - ₹${r.price}`;
+            if (r.price === cheapestPrice) {
+              div.classList.add("cheapest"); // highlight cheapest
+              div.innerHTML = `🌟 <strong>${r.shop}</strong> - ₹${r.price} (Cheapest)`;
+            } else {
+              div.innerHTML = `<strong>${r.shop}</strong> - ₹${r.price}`;
+            }
             resultsDiv.appendChild(div);
           });
         } else {
